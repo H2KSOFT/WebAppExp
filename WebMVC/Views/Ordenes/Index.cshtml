@@ -1,0 +1,122 @@
+﻿@using WebMVC.Controllers
+@model List<OrdenDto>
+@{
+    ViewData["Title"] = "Órdenes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Lista de Órdenes</h2>
+        <div>
+            @if (User.IsInRole("Admin") || User.IsInRole("Vendedor"))
+            {
+                <a href="@Url.Action("Crear")" class="btn btn-primary">Nueva Orden</a>
+            }
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Órdenes Registradas</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <th>Acciones</th>
+                                }
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var orden in Model)
+                            {
+                                <tr>
+                                    <td>@orden.Id</td>
+                                    <td>@orden.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>@orden.Cliente</td>
+                                    <td>@orden.Total.ToString("C")</td>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <td>
+
+                                            <a href="@Url.Action("Editar", new { id = orden.Id })" class="btn btn-primary btn-sm">Editar</a>
+                                            <form method="post" action="@Url.Action("Eliminar", new { id = orden.Id })" class="d-inline"
+                                            onsubmit="return confirm('¿Está seguro de eliminar esta orden?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                            </form>
+
+                                        </td>
+                                    }
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#detalles-@orden.Id">
+                                            Ver Detalles (@orden.Detalles.Count)
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" class="p-0">
+                                        <div id="detalles-@orden.Id" class="collapse">
+                                            <div class="p-3 bg-light">
+                                                <h6>Detalles de la Orden</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Producto</th>
+                                                            <th>Cantidad</th>
+                                                            <th>Precio Unitario</th>
+                                                            <th>SubTotal</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var detalle in orden.Detalles)
+                                                        {
+                                                            <tr>
+                                                                <td>@detalle.Producto</td>
+                                                                <td>@detalle.Cantidad</td>
+                                                                <td>@detalle.PrecioUnitario.ToString("C")</td>
+                                                                <td>@detalle.SubTotal.ToString("C")</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    No hay órdenes registradas.
+                </div>
+            }
+        </div>
+    </div>
+</div>

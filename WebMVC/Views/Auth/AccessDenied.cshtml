@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Acceso Denegado";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="alert alert-danger">
+                <h2>🚫 Acceso Denegado</h2>
+                <p class="mb-3">No tienes permisos para acceder a esta página.</p>
+                <p class="mb-3">
+                    <small>
+                        Usuario: <strong>@User.Identity.Name</strong><br>
+                        Rol: <strong>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</strong>
+                    </small>
+                </p>
+                <div class="mt-3">
+                    <a href="@Url.Action("Index", "Ordenes")" class="btn btn-primary me-2">Volver al Inicio</a>
+                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-outline-secondary">Cambiar Usuario</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

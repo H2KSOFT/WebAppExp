@@ -1,0 +1,69 @@
+﻿@{
+    ViewData["Title"] = "Error";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            
+            <div class="mb-4">
+                <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+            </div>
+
+            
+            <h1 class="display-4 text-danger mb-3">¡Ups! Algo salió mal</h1>
+
+            <p class="lead mb-4">
+                Ha ocurrido un error inesperado en la aplicación.
+                Nuestro equipo ha sido notificado y está trabajando para solucionarlo.
+            </p>
+
+            
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-warning text-start mb-4">
+                    <h5 class="alert-heading">Detalles del error:</h5>
+                    <p class="mb-0">@ViewBag.ErrorMessage</p>
+                </div>
+            }
+
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">¿Qué puedes hacer?</h5>
+                    <ul class="list-unstyled">
+                        <li>✅ <strong>Volver a intentar</strong> la acción que estabas realizando</li>
+                        <li>✅ <strong>Verificar</strong> que la información ingresada sea correcta</li>
+                        <li>✅ <strong>Contactar al administrador</strong> si el problema persiste</li>
+                    </ul>
+                </div>
+            </div>
+
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-center">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary me-md-2">
+                    📄 Volver Atrás
+                </a>
+                <a href="@Url.Action("Index", "Ordenes")" class="btn btn-primary me-md-2">
+                    📋 Ir a Órdenes
+                </a>
+                <a href="@Url.Action("Login", "Auth")" class="btn btn-outline-primary">
+                    🔄 Reiniciar Sesión
+                </a>
+            </div>
+
+            
+            <div class="mt-5 p-3 bg-light rounded">
+                <small class="text-muted">
+                    Si el problema continúa, por favor contacta al equipo de soporte:<br>
+                    ✉️ soporte@empresa.com | 📞 +1 234-567-890
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

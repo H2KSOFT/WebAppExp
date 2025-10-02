@@ -1,0 +1,272 @@
+﻿@using WebMVC.Controllers
+@model EditarOrdenViewModel
+@{
+    ViewData["Title"] = "Editar Orden";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Editar Orden #@Model.Id</h2>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">← Volver</a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <h5>Errores de validación:</h5>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información de la Orden</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Fecha" class="form-label">Fecha</label>
+                            <input asp-for="Fecha" name="Fecha" class="form-control" type="datetime-local"
+                                   value="@Model.Fecha.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="Fecha" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Cliente" class="form-label">Cliente *</label>
+                            <input asp-for="Cliente" name="Cliente" class="form-control" placeholder="Nombre del cliente" value="@Model.Cliente" required />
+                            <span asp-validation-for="Cliente" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Detalles de la Orden</h5>
+                <button type="button" id="btnAgregarDetalle" class="btn btn-success btn-sm">
+                    + Agregar Producto
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="detalles-container">
+                    @{
+                        Int32 i = 0;
+                    }
+                    @foreach (DetalleOrdenViewModel item in Model.Detalles)
+                    {
+                        <div class="detalle-item border-bottom pb-3 mb-3" data-index="@i">
+                            <h6 class="text-muted">Producto @(i + 1)</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Producto *</label>
+                                        <input asp-for="Detalles[@i].Producto" name="Detalles[@i].Producto" class="form-control" placeholder="Nombre del producto" value="@item.Producto" />
+                                        <span asp-validation-for="Detalles[@i].Producto" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="mb-3">
+                                        <label class="form-label">Cantidad</label>
+                                        <input asp-for="Detalles[@i].Cantidad" name="Detalles[@i].Cantidad" class="form-control cantidad" type="number" min="1" value="@item.Cantidad.ToString("0", System.Globalization.CultureInfo.InvariantCulture)" />
+                                        <span asp-validation-for="Detalles[@i].Cantidad" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Precio Unitario</label>
+                                        <input asp-for="Detalles[@i].PrecioUnitario" name="Detalles[@i].PrecioUnitario" class="form-control precio" type="number" step="0.01" min="0.01" value="@item.PrecioUnitario.ToString("0", System.Globalization.CultureInfo.InvariantCulture)" />
+                                        <span asp-validation-for="Detalles[@i].PrecioUnitario" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="mb-3">
+                                        <label class="form-label">SubTotal</label>
+                                        <input type="text" class="form-control subtotal" value="@item.SubTotal" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="mb-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="button" class="btn btn-danger btn-sm btn-remover w-100"
+                                        @(Model.Detalles.Count <= 1 ? "disabled" : "")>
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        i++;
+                    }
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-9 text-end">
+                        <strong class="fs-5">Total:</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" id="total" class="form-control fw-bold text-success fs-5" value="$0.00" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">Actualizar Orden</button>
+            <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let detalleCount = @Model.Detalles.Count;
+
+            function getDetalleTemplate(index) {
+                return `
+                <div class="detalle-item border-bottom pb-3 mb-3" data-index="${index}">
+                    <h6 class="text-muted">Producto ${index + 1}</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Producto *</label>
+                                <input name="Detalles[${index}].Producto" class="form-control" placeholder="Nombre del producto" required />
+                                <span class="text-danger field-validation-valid" data-valmsg-for="Detalles[${index}].Producto" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <label class="form-label">Cantidad</label>
+                                <input name="Detalles[${index}].Cantidad" class="form-control cantidad" type="number" min="1" value="1" required />
+                                <span class="text-danger field-validation-valid" data-valmsg-for="Detalles[${index}].Cantidad" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Precio Unitario</label>
+                                <input name="Detalles[${index}].PrecioUnitario" class="form-control precio" type="number" step="0.01" min="0.01" value="1.00" required />
+                                <span class="text-danger field-validation-valid" data-valmsg-for="Detalles[${index}].PrecioUnitario" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <label class="form-label">SubTotal</label>
+                                <input type="text" class="form-control subtotal" value="$1.00" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="button" class="btn btn-danger btn-sm btn-remover w-100">×</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }
+
+            $('#btnAgregarDetalle').click(function () {
+                const newIndex = detalleCount++;
+                $('#detalles-container').append(getDetalleTemplate(newIndex));
+                calcularTotales();
+                actualizarBotonesRemover();
+            });
+
+            $(document).on('click', '.btn-remover', function () {
+                if ($('.detalle-item').length > 1) {
+                    $(this).closest('.detalle-item').remove();
+                    reindexarDetalles();
+                    calcularTotales();
+                    actualizarBotonesRemover();
+                }
+            });
+
+            function reindexarDetalles() {
+                $('.detalle-item').each(function (index) {
+                    $(this).attr('data-index', index);
+                    $(this).find('h6').text('Producto ' + (index + 1));
+
+                    $(this).find('input[name*="Producto"]').attr('name', `Detalles[${index}].Producto`);
+                    $(this).find('input[name*="Cantidad"]').attr('name', `Detalles[${index}].Cantidad`);
+                    $(this).find('input[name*="PrecioUnitario"]').attr('name', `Detalles[${index}].PrecioUnitario`);
+
+                    
+                    $(this).find('[data-valmsg-for]').each(function () {
+                        const oldFor = $(this).attr('data-valmsg-for');
+                        const newFor = oldFor.replace(/Detalles\[\d+\]/, `Detalles[${index}]`);
+                        $(this).attr('data-valmsg-for', newFor);
+                    });
+                });
+                detalleCount = $('.detalle-item').length;
+            }
+
+            function actualizarBotonesRemover() {
+                const $botones = $('.btn-remover');
+                if ($botones.length <= 1) {
+                    $botones.prop('disabled', true);
+                } else {
+                    $botones.prop('disabled', false);
+                }
+            }
+
+            function calcularTotales() {
+                let total = 0;
+
+                $('.detalle-item').each(function () {
+                    const cantidad = parseFloat($(this).find('.cantidad').val()) || 0;
+                    const precio = parseFloat($(this).find('.precio').val()) || 0;
+                    const subtotal = cantidad * precio;
+
+                    $(this).find('.subtotal').val('$' + subtotal.toFixed(2));
+                    total += subtotal;
+                });
+
+                $('#total').val('$' + total.toFixed(2));
+            }
+
+            $(document).on('input', '.cantidad, .precio', calcularTotales);
+
+            calcularTotales();
+            actualizarBotonesRemover();
+
+            $('#ordenForm').on('submit', function (e) {
+                let isValid = true;
+                var items = 0;
+                $('.detalle-item').each(function (index) {
+                    const producto = $(this).find('input[name*="Producto"]').val();
+                    const cantidad = $(this).find('.cantidad').val();
+                    const precio = $(this).find('.precio').val();
+                    if (!producto || !cantidad || !precio) {
+                        isValid = false;
+                        $(this).addClass('border border-danger');
+                    } else {
+                        $(this).removeClass('border border-danger');
+                    }
+                    items++;
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Por favor complete todos los campos de los productos');
+                }
+
+                if(items == 0){
+                    e.preventDefault();
+                    alert('Debe incluir por lo menos un producto');
+                }
+            });
+        });
+    </script>
+}
