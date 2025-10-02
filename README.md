@@ -30,5 +30,6 @@ Sistema moderno para gestión de órdenes construido con .NET 8, Clean Architect
 - ✅ Documentación Swagger
 
 ## Ejecución
-1. Configurar connection string en `Web.API/appsettings.json` y `Web.MVC/appsettings.json`
+1. Ejecutar el script de creación de la base de datos que se encuentra en la carpeta `database/001_Create_Database.sql`
+2. Configurar connection string en `Web.API/appsettings.json` y `Web.MVC/appsettings.json`
 3. Ejecutar Web.API y Web.MVC
